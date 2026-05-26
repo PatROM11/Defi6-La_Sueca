@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Sueca - Édition Premium</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 5px 0;
+            color: #d4af37;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 28px;
+        }
+
+        #top-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        #main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Panneau d'aide latéral */
+        #sidebar {
+            width: 260px;
+            background: #2a2a2a;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        #sidebar h3 {
+            margin-top: 0;
+            color: #d4af37;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            text-align: center;
+        }
+
+        .rule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .rule-table th, .rule-table td {
+            padding: 5px;
+            text-align: left;
+        }
+
+        .rule-table tr:nth-child(even) { background: #333; }
+
+        /* Tapis de jeu */
+        #game-container {
+            position: relative;
+            width: 720px;
+            height: 520px;
+            background: radial-gradient(#1b5e20, #0d3c12);
+            border: 14px solid #3e2723;
+            border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.6), 0 10px 25px rgba(0,0,0,0.7);
+        }
+
+        /* HUD et Scores */
+        #hud {
+            display: flex;
+            justify-content: space-around;
+            width: 720px;
+            background: #222;
+            border: 2px solid #d4af37;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            padding: 10px 0;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .score-box { text-align: center; }
+        .score-val { color: #d4af37; font-size: 20px; }
+
+        /* Positions des joueurs autour de la table */
+        .player-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            border: 2px solid #555;
+            z-index: 10;
+            transition: all 0.3s ease;
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .player-label.active { 
+            border-color: #ffeb3b; 
+            box-shadow: 0 0 15px #ffeb3b; 
+            transform: scale(1.05);
+        }
+        
+        #label-p0 { bottom: 10px; left: 50%; transform: translateX(-50%); color: #4fc3f7; }
+        #label-p1 { left: 15px; top: 50%; transform: translateY(-50%); }
+        #label-p2 { top: 10px; left: 50%; transform: translateX(-50%); color: #ffb74d; }
+        #label-p3 { right: 15px; top: 50%; transform: translateY(-50%); }
+
+        /* Zone centrale tactile/cliquable */
+        #table-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 320px;
+            height: 240px;
+            transform: translate(-50%, -50%);
+            border: 2px dashed rgba(212, 175, 55, 0.5);
+            border-radius: 15px;
+            background: rgba(0,0,0,0.25);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            transition: background 0.2s;
+        }
+        #table-center:hover { background: rgba(212, 175, 55, 0.15); }
+
+        #action-prompt {
+            color: #ffeb3b;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            padding: 5px;
+            text-shadow: 1px 1px 3px black;
+            pointer-events: none;
+            line-height: 1.4;
+            z-index: 8;
+        }
+
+        /* Bouton d'explication (Point d'interrogation) */
+        #btn-explain {
+            display: none;
+            margin-top: 5px;
+            padding: 4px 10px;
+            background: #ffb74d;
+            border: none;
+            color: black;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        #btn-explain:hover { background: #ffe082; }
+
+        /* Cartes stylisées type Casino */
+        .card {
+            width: 60px;
+            height: 90px;
+            background: linear-gradient(135deg, #ffffff, #eaeaea);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            box-sizing: border-box;
+            font-weight: bold;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.5), inset 0 0 4px rgba(0,0,0,0.2);
+            user-select: none;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+        .card.red { color: #d32f2f; }
+        .card.black { color: #111111; }
+        
+        .card .suit-center {
+            font-size: 26px;
+            text-align: center;
+            line-height: 1;
+        }
+        .card .top-left { font-size: 16px; line-height: 1; }
+        .card .bottom-right { font-size: 16px; line-height: 1; transform: rotate(180deg); }
+
+        /* Animation d'apparition avec rotation */
+        @keyframes playCardAnim {
+            0% {
+                opacity: 0;
+                transform: translate(var(--startX), var(--startY)) scale(0.5) rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(var(--rotAngle));
+            }
+        }
+
+        .animated-card {
+            animation: playCardAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+        }
+
+        /* Main du joueur humain */
+        #player-hand {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 12;
+            width: max-content;
+        }
+        #player-hand .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #player-hand .card:hover {
+            transform: translateY(-20px);
+            border-color: #ffeb3b;
+            box-shadow: 0 0 12px #ffeb3b;
+            cursor: pointer;
+        }
+
+        /* Cartes posées au centre */
+        .played-container { 
+            position: absolute; 
+            z-index: 6; 
+            pointer-events: none; 
+        }
+        #played-0 { bottom: 12px; left: 50%; margin-left: -30px; } 
+        #played-1 { left: 12px; top: 50%; margin-top: -45px; }    
+        #played-2 { top: 12px; left: 50%; margin-left: -30px; }   
+        #played-3 { right: 12px; top: 50%; margin-top: -45px; }   
+
+        /* Boutons principaux */
+        .game-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #btn-main {
+            background: linear-gradient(#d4af37, #aa820a);
+            color: black;
+            border: 1px solid #ffe57f;
+        }
+        #btn-main:hover { background: linear-gradient(#ffe57f, #d4af37); }
+        
+        #btn-rules {
+            background: #333;
+            color: #d4af37;
+            border: 1px solid #d4af37;
+        }
+        #btn-rules:hover { background: #444; }
+
+        /* Écrans de Configuration et Panneaux Popups */
+        .overlay-panel {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            width: 310px;
+            box-sizing: border-box;
+        }
+        .overlay-panel h4 { margin-top: 0; color: #d4af37; text-align: center; margin-bottom: 12px; font-size: 16px; }
+        
+        .panel-step { display: none; }
+        .panel-step.active { display: block; }
+
+        .input-group { margin-bottom: 8px; display: flex; flex-direction: column; }
+        .input-group label { font-size: 11px; margin-bottom: 3px; color: #ccc; }
+        .input-group input { padding: 6px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-weight: bold; font-size: 13px; }
+        
+        .panel-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .panel-btn { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
+        .btn-gold { background: linear-gradient(#d4af37, #aa820a); color: black; }
+        .btn-gold:hover { background: linear-gradient(#ffe57f, #d4af37); }
+        .btn-dark { background: #444; color: white; }
+        .btn-dark:hover { background: #555; }
+
+        /* Style spécifique pour la popup de la règle complète */
+        #rules-popup {
+            width: 460px;
+            max-height: 440px;
+            overflow-y: auto;
+        }
+        #rules-popup p, #rules-popup ul { font-size: 12px; color: #ddd; line-height: 1.5; margin: 6px 0; padding-left: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1>La Sueca</h1>
+    
+    <div id="top-bar">
+        <button id="btn-main" class="game-btn" onclick="showNameChoice()">Distribuer les cartes</button>
+        <button id="btn-rules" class="game-btn" onclick="toggleRulesPopup(true)">📜 Règles du jeu</button>
+    </div>
+
+    <div id="main-layout">
+        <!-- Aide mémoire à gauche -->
+        <div id="sidebar">
+            <h3>Couleurs (Naipes)</h3>
+            <table class="rule-table" style="margin-bottom: 15px;">
+                <tr><td>♥ <b>Copas</b> (Cœur)</td><td>♣ <b>Paus</b> (Trèfle)</td></tr>
+                <tr><td>♠ <b>Espadas</b> (Pique)</td><td>♦ <b>Ouros</b> (Carreau)</td></tr>
+            </table>
+
+            <h3>Ordre & Points</h3>
+            <table class="rule-table">
+                <thead><tr><th>Carte</th><th>Nom</th><th>Points</th></tr></thead>
+                <tbody>
+                    <tr><td><b>A</b></td><td>Ás</td><td><b>11 pts</b></td></tr>
+                    <tr><td><b>7</b></td><td>Manilha</td><td><b>10 pts</b></td></tr>
+                    <tr><td><b>K</b></td><td>Rei</td><td><b>4 pts</b></td></tr>
+                    <tr><td><b>J</b></td><td>Valete</td><td><b>3 pts</b></td></tr>
+                    <tr><td><b>Q</b></td><td>Dama</td><td><b>2 pts</b></td></tr>
+                    <tr><td>6, 5, 4, 3, 2</td><td>Brancas</td><td>0 pt</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size: 11px; color:#aaa; margin-top:10px; text-align:center;">Total : 120 points.<br>L'équipe à 61+ points gagne.</p>
+        </div>
+
+        <!-- Zone de jeu à droite -->
+        <div>
+            <div id="hud">
+                <div class="score-box"><div>ATOUT (TRUNFO)</div><span id="atout-val" style="font-size:18px;">-</span></div>
+                <div class="score-box"><div>ÉQUIPE <span id="hud-ns-name">NORD / SUD</span></div><span id="score-ns" class="score-val">0</span></div>
+                <div class="score-box"><div>ÉQUIPE <span id="hud-eo-name">EST / OUEST</span></div><span id="score-eo" class="score-val">0</span></div>
+            </div>
+
+            <div id="game-container">
+                <!-- Libellés Joueurs -->
+                <div id="label-p0" class="player-label">Vous (Sud)</div>
+                <div id="label-p1" class="player-label">IA 1 (Ouest)</div>
+                <div id="label-p2" class="player-label">IA 2 (Nord)</div>
+                <div id="label-p3" class="player-label">IA 3 (Est)</div>
+
+                <!-- POPUP CONFIGURATION DES NOMS -->
+                <div id="name-config-panel" class="overlay-panel">
+                    <div id="step-choice" class="panel-step active">
+                        <h4>Configuration de la partie</h4>
+                        <p style="font-size: 13px; text-align: center; margin: 10px 0; color: #ddd; line-height: 1.4;">
+                            Souhaitez-vous personnaliser le nom des joueurs avant de lancer le jeu ?
+                        </p>
+                        <div class="panel-buttons">
+                            <button class="panel-btn btn-gold" onclick="goToInputs()">✏️ Personnaliser les noms</button>
+                            <button class="panel-btn btn-dark" onclick="applyNamesAndStart(false)">🎲 Noms par défaut</button>
+                        </div>
+                    </div>
+
+                    <div id="step-inputs" class="panel-step">
+                        <h4>Saisie des pseudos</h4>
+                        <div class="input-group">
+                            <label>Votre nom (Sud) :</label>
+                            <input type="text" id="input-p0" value="Vous">
+                        </div>
+                        <div class="input-group">
+                            <label>IA 1 (Ouest) :</label>
+                            <input type="text" id="input-p1" value="IA 1">
+                        </div>
+                        <div class="input-group">
+                            <label>IA 2 (Nord - Partenaire) :</label>
+                            <input type="text" id="input-p2" value="IA 2">
+                        </div>
+                        <div class="input-group">
+                            <label>IA 3 (Est) :</label>
+                            <input type="text" id="input-p3" value="IA 3">
+                        </div>
+                        <div class="panel-buttons">
+                            <button class="panel-btn btn-gold" onclick="applyNamesAndStart(true)">Jouer !</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POPUP DES REGLES COMPLETES -->
+                <div id="rules-popup" class="overlay-panel">
+                    <h4>Règles officielles de la Sueca</h4>
+                    <p><b>But du jeu :</b> Accumuler le plus de points possible avec son partenaire de camp (Nord/Sud ou Est/Ouest). Une partie compte 120 points au total. L'équipe qui obtient 61 points ou plus gagne la manche.</p>
+                    <p><b>La Distribution :</b> Chaque joueur reçoit 10 cartes (l'intégralité du paquet de 40 cartes est distribuée). La toute dernière carte distribuée détermine la couleur de l'<b>Atout (Trunfo)</b> pour toute la manche.</p>
+                    <p><b>Déroulement d'un pli :</b></p>
+                    <ul>
+                        <li>Le premier joueur pose la carte de son choix, ce qui fixe la <b>couleur demandée</b>.</li>
+                        <li>Chaque joueur suivant a l'<b>obligation absolue de fournir</b> la couleur demandée s'il en possède en main.</li>
+                        <li>Si un joueur n'a pas la couleur demandée, il peut couper avec un <b>Atout</b> (Trunfo) ou se défausser d'une autre couleur (Renonce).</li>
+                    </ul>
+                    <p><b>Qui remporte le pli ?</b> Celui qui a posé l'Atout le plus fort. Si aucun Atout n'a été joué, c'est celui qui a posé la carte la plus forte dans la couleur demandée initiale.</p>
+                    <div class="panel-buttons">
+                        <button class="panel-btn btn-gold" onclick="toggleRulesPopup(false)">Fermer les règles</button>
+                    </div>
+                </div>
+
+                <!-- Tapis central interactif -->
+                <div id="table-center" onclick="handleTableClick()">
+                    <div id="action-prompt">Cliquez sur "Distribuer les cartes" pour commencer</div>
+                    <button id="btn-explain" onclick="showExplanation(event)">❓ Log du pli</button>
+                    
+                    <div id="played-0" class="played-container"></div>
+                    <div id="played-1" class="played-container"></div>
+                    <div id="played-2" class="played-container"></div>
+                    <div id="played-3" class="played-container"></div>
+                </div>
+
+                <!-- Main du joueur humain -->
+                <div id="player-hand"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const SUITS = { 
+        'C': { name: 'Copas', sym: '♥', color: 'red' }, 
+        'D': { name: 'Ouros', sym: '♦', color: 'red' }, 
+        'S': { name: 'Espadas', sym: '♠', color: 'black' }, 
+        'H': { name: 'Paus', sym: '♣', color: 'black' } 
+    };
+    const VALUES_ORDER = ['A', '7', 'K', 'J', 'Q', '6', '5', '4', '3', '2'];
+    const POINTS = { 'A': 11, '7': 10, 'K': 4, 'J': 3, 'Q': 2, '6': 0, '5': 0, '4': 0, '3': 0, '2': 0 };
+
+    const START_POSITIONS = {
+        0: { x: '0px', y: '250px' },   
+        1: { x: '-250px', y: '0px' },  
+        2: { x: '0px', y: '-250px' },  
+        3: { x: '250px', y: '0px' }    
+    };
+
+    let deck = [];
+    let hands = [[], [], [], []]; 
+    let currentAtout = '';
+    let currentTrick = []; 
+    let leader = 0; 
+    let turn = 0; 
+    let scoreNS = 0;
+    let scoreEO = 0;
+    let gameState = 'WAITING'; 
+    let lastTrickExplanation = ""; 
+
+    let playerNames = { 0: "Vous", 1: "IA 1", 2: "IA 2", 3: "IA 3" };
+
+    function toggleRulesPopup(show) {
+        document.getElementById('rules-popup').style.display = show ? 'block' : 'none';
+    }
+
+    function showNameChoice() {
+        document.getElementById('top-bar').style.visibility = 'hidden';
+        document.getElementById('name-config-panel').style.display = 'block';
+        document.getElementById('step-choice').classList.add('active');
+        document.getElementById('step-inputs').classList.remove('active');
+    }
+
+    function goToInputs() {
+        document.getElementById('step-choice').classList.remove('active');
+        document.getElementById('step-inputs').classList.add('active');
+    }
+
+    function applyNamesAndStart(useCustomValues) {
+        if (useCustomValues) {
+            playerNames[0] = document.getElementById('input-p0').value.trim() || "Vous";
+            playerNames[1] = document.getElementById('input-p1').value.trim() || "IA 1";
+            playerNames[2] = document.getElementById('input-p2').value.trim() || "IA 2";
+            playerNames[3] = document.getElementById('input-p3').value.trim() || "IA 3";
+        } else {
+            playerNames = { 0: "Vous", 1: "IA 1", 2: "IA 2", 3: "IA 3" };
+        }
+        
+        document.getElementById('name-config-panel').style.display = 'none';
+        document.getElementById('top-bar').style.visibility = 'visible';
+
+        document.getElementById('label-p0').innerText = playerNames[0] + " (Sud)";
+        document.getElementById('label-p1').innerText = playerNames[1] + " (Ouest)";
+        document.getElementById('label-p2').innerText = playerNames[2] + " (Nord)";
+        document.getElementById('label-p3').innerText = playerNames[3] + " (Est)";
+
+        document.getElementById('hud-ns-name').innerText = playerNames[0].toUpperCase() + " / " + playerNames[2].toUpperCase();
+        document.getElementById('hud-eo-name').innerText = playerNames[1].toUpperCase() + " / " + playerNames[3].toUpperCase();
+
+        initGame();
+    }
+
+    function createDeck() {
+        let newDeck = [];
+        for (let suit in SUITS) {
+            for (let val of VALUES_ORDER) {
+                newDeck.push({ value: val, suit: suit });
+            }
+        }
+        for (let i = newDeck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+        }
+        return newDeck;
+    }
+
+    function initGame() {
+        deck = createDeck();
+        scoreNS = 0;
+        scoreEO = 0;
+        document.getElementById('score-ns').innerText = scoreNS;
+        document.getElementById('score-eo').innerText = scoreEO;
+        document.getElementById('btn-explain').style.display = 'none';
+        lastTrickExplanation = "";
+        
+        hands = [[], [], [], []];
+        for (let i = 0; i < 4; i++) {
+            hands[i] = deck.slice(i * 10, (i + 1) * 10);
+            if(i === 0) {
+                hands[0].sort((a,b) => a.suit.localeCompare(b.suit) || VALUES_ORDER.indexOf(a.value) - VALUES_ORDER.indexOf(b.value));
+            }
+        }
+
+        const atoutCard = deck[deck.length - 1];
+        currentAtout = atoutCard.suit;
+        
+        const atoutSpan = document.getElementById('atout-val');
+        atoutSpan.innerText = SUITS[currentAtout].sym + " " + SUITS[currentAtout].name;
+        atoutSpan.style.color = SUITS[currentAtout].color === 'red' ? '#ff4d4d' : '#ffffff';
+
+        leader = Math.floor(Math.random() * 4); 
+        turn = leader;
+        currentTrick = [];
+        
+        clearTable();
+        renderPlayerHand();
+        document.getElementById('btn-main').style.display = 'none';
+        
+        progressGame();
+    }
+
+    function clearTable() {
+        for(let i=0; i<4; i++) {
+            document.getElementById(`played-${i}`).innerHTML = '';
+        }
+    }
+
+    function updateTurnHighlight() {
+        for (let i = 0; i < 4; i++) {
+            document.getElementById(`label-p${i}`).classList.remove('active');
+        }
+        if (gameState !== 'TRICK_DONE' && gameState !== 'GAME_OVER') {
+            document.getElementById(`label-p${turn}`).classList.add('active');
+        }
+    }
+
+    function renderPlayerHand() {
+        const handDiv = document.getElementById('player-hand');
+        handDiv.innerHTML = '';
+        hands[0].forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${SUITS[card.suit].color}`;
+            cardEl.innerHTML = `
+                <div class="top-left">${card.value}</div>
+                <div class="suit-center">${SUITS[card.suit].sym}</div>
+                <div class="bottom-right">${card.value}</div>
+            `;
+            cardEl.onclick = (e) => {
+                e.stopPropagation(); 
+                if (gameState === 'WAITING_HUMAN' && turn === 0) {
+                    tryPlayHuman(index);
+                }
+            };
+            handDiv.appendChild(cardEl);
+        });
+    }
+
+    function handleTableClick() {
+        if (gameState === 'PLAYING_AI') {
+            playAI();
+        } else if (gameState === 'TRICK_DONE') {
+            resolveTrick();
+        }
+    }
+
+    function progressGame() {
+        updateTurnHighlight();
+        if (turn === 0) {
+            gameState = 'WAITING_HUMAN';
+            document.getElementById('action-prompt').innerHTML = "C'est votre tour !<br><span style='color:#fff;'>Touchez une carte de votre main en bas.</span>";
+        } else {
+            gameState = 'PLAYING_AI';
+            let nameIA = turn === 2 ? playerNames[2] + " (Votre partenaire)" : playerNames[turn];
+            document.getElementById('action-prompt').innerHTML = "C'est au tour de <b>" + nameIA + "</b>.<br><span style='color:#4fc3f7;'>👉 Touchez la table pour le faire jouer.</span>";
+        }
+    }
+
+    function tryPlayHuman(cardIndex) {
+        const card = hands[0][cardIndex];
+        
+        if (currentTrick.length > 0) {
+            const leadSuit = currentTrick[0].card.suit;
+            if (card.suit !== leadSuit && hands[0].some(c => c.suit === leadSuit)) {
+                alert(`Obligation de fournir ! Vous devez jouer du ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).`);
+                return;
+            }
+        }
+
+        hands[0].splice(cardIndex, 1);
+        renderPlayerHand();
+        executePlay(0, card);
+    }
+
+    function playAI() {
+        const myHand = hands[turn];
+        let cardToPlay;
+
+        if (currentTrick.length === 0) {
+            cardToPlay = myHand.shift();
+        } else {
+            const leadSuit = currentTrick[0].card.suit;
+            const validCards = myHand.filter(c => c.suit === leadSuit);
+
+            if (validCards.length > 0) {
+                cardToPlay = validCards[0];
+                hands[turn] = myHand.filter(c => c !== cardToPlay);
+            } else {
+                cardToPlay = myHand.shift();
+            }
+        }
+
+        executePlay(turn, cardToPlay);
+    }
+
+    function executePlay(playerIdx, card) {
+        currentTrick.push({ player: playerIdx, card: card });
+        
+        const randomAngle = (Math.random() * 24 - 12) + "deg";
+        const start = START_POSITIONS[playerIdx];
+
+        const targetDiv = document.getElementById(`played-${playerIdx}`);
+        
+        targetDiv.innerHTML = `
+            <div class="card ${SUITS[card.suit].color} animated-card" 
+                 style="--startX: ${start.x}; --startY: ${start.y}; --rotAngle: ${randomAngle};">
+                <div class="top-left">${card.value}</div>
+                <div class="suit-center">${SUITS[card.suit].sym}</div>
+                <div class="bottom-right">${card.value}</div>
+            </div>`;
+
+        turn = (turn + 1) % 4;
+
+        if (currentTrick.length === 4) {
+            gameState = 'TRICK_DONE';
+            document.getElementById('action-prompt').innerHTML = "<span style='color:#ffeb3b; font-size:15px;'>Le pli est complet !</span><br>👉 Touchez le tapis pour compter.";
+        } else {
+            progressGame();
+        }
+    }
+
+    function resolveTrick() {
+        const leadSuit = currentTrick[0].card.suit;
+        let winnerObj = currentTrick[0];
+        let cutOccurred = currentTrick[0].card.suit === currentAtout;
+        let detailsLog = `Couleur initialement demandée : ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).\n\nCartes jouées :\n`;
+
+        currentTrick.forEach(t => {
+            detailsLog += `- ${playerNames[t.player]} : ${t.card.value} de ${SUITS[t.card.suit].name} ${SUITS[t.card.suit].sym}\n`;
+        });
+
+        for (let i = 1; i < currentTrick.length; i++) {
+            const current = currentTrick[i];
+            const winnerCard = winnerObj.card;
+            const currentCard = current.card;
+            let currentIsStronger = false;
+
+            if (currentCard.suit === winnerCard.suit) {
+                if (VALUES_ORDER.indexOf(currentCard.value) < VALUES_ORDER.indexOf(winnerCard.value)) {
+                    currentIsStronger = true;
+                }
+            } else if (currentCard.suit === currentAtout) {
+                currentIsStronger = true;
+                cutOccurred = true;
+            }
+
+            if (currentIsStronger) {
+                winnerObj = current;
+            }
+        }
+
+        let trickPoints = 0;
+        currentTrick.forEach(t => { trickPoints += POINTS[t.card.value]; });
+
+        let winnerName = playerNames[winnerObj.player];
+
+        // Construction du log d'explication précis
+        detailsLog += `\nRésultat : ${winnerName} remporte le pli avec son ${winnerObj.card.value} de ${SUITS[winnerObj.card.suit].name}. `;
+        if (winnerObj.card.suit === currentAtout && leadSuit !== currentAtout) {
+            detailsLog += `Il a coupé avec l'Atout !`;
+        } else {
+            detailsLog += `C'était la carte la plus forte dans la couleur demandée.`;
+        }
+        detailsLog += `\nValeur totale récoltée : ${trickPoints} points.`;
+        lastTrickExplanation = detailsLog;
+
+        if (winnerObj.player === 0 || winnerObj.player === 2) {
+            scoreNS += trickPoints;
+            document.getElementById('score-ns').innerText = scoreNS;
+        } else {
+            scoreEO += trickPoints;
+            document.getElementById('score-eo').innerText = scoreEO;
+        }
+
+        leader = winnerObj.player;
+        turn = leader;
+        currentTrick = [];
+        clearTable();
+
+        document.getElementById('btn-explain').style.display = 'block';
+
+        if (hands[0].length > 0) {
+            document.getElementById('action-prompt').innerHTML = "<b>" + winnerName + "</b> remporte le pli (+" + trickPoints + " pts).<br>Préparation du pli suivant...";
+            setTimeout(progressGame, 1400);
+        } else {
+            endHand();
+        }
+    }
+
+    function showExplanation(event) {
+        event.stopPropagation(); 
+        if(lastTrickExplanation) {
+            alert(lastTrickExplanation);
+        }
+    }
+
+    function endHand() {
+        gameState = 'GAME_OVER';
+        document.getElementById('btn-explain').style.display = 'none';
+        let msg = `<b>Fin de la partie !</b><br>${playerNames[0]}/${playerNames[2]} : ${scoreNS} pts<br>${playerNames[1]}/${playerNames[3]} : ${scoreEO} pts.<br>`;
+        if (scoreNS > 60) {
+            msg += "<span style='color:#66bb6a; font-size:16px;'>🏆 Victoire de votre équipe !</span>";
+        } else if (scoreEO > 60) {
+            msg += "<span style='color:#ef5350; font-size:16px;'>❌ Défaite de votre équipe.</span>";
+        } else {
+            msg += "🤝 Égalité parfaite (60-60).";
+        }
+        
+        document.getElementById('action-prompt').innerHTML = msg;
+        document.getElementById('btn-main').style.display = 'block';
+        document.getElementById('btn-main').innerText = 'Rejouer une partie';
+    }
+</script>
+</body>
+</html>
