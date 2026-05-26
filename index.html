@@ -2,138 +2,172 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Sueca - Édition Premium</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
+        /* Reset et blocage du scroll pour effet App intégrale */
+        html, body {
             margin: 0;
-            padding: 15px;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
         }
 
         h1 {
-            margin: 5px 0;
+            margin: 5px 0 2px 0;
             color: #d4af37;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            font-size: 28px;
+            font-size: 3.5vh;
+            max-height: 5vh;
+            text-align: center;
         }
 
         #top-bar {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 5px;
+            height: 5vh;
+            align-items: center;
         }
         
+        /* Layout principal sans scroll */
         #main-layout {
             display: flex;
-            gap: 20px;
-            max-width: 1100px;
-            width: 100%;
+            gap: 10px;
+            width: 98vw;
+            height: 86vh;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
+            box-sizing: border-box;
         }
 
-        /* Panneau d'aide latéral */
+        /* Panneau d'aide latéral (Paysage uniquement) */
         #sidebar {
-            width: 260px;
+            width: 220px;
+            height: 95%;
             background: #2a2a2a;
             border: 2px solid #d4af37;
             border-radius: 10px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 11px;
         }
 
         #sidebar h3 {
-            margin-top: 0;
+            margin: 2px 0;
             color: #d4af37;
             border-bottom: 1px solid #444;
-            padding-bottom: 5px;
+            padding-bottom: 2px;
             text-align: center;
+            font-size: 13px;
         }
 
         .rule-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
         }
 
         .rule-table th, .rule-table td {
-            padding: 5px;
+            padding: 3px;
             text-align: left;
         }
 
         .rule-table tr:nth-child(even) { background: #333; }
 
-        /* Tapis de jeu */
-        #game-container {
-            position: relative;
-            width: 720px;
-            height: 520px;
-            background: radial-gradient(#1b5e20, #0d3c12);
-            border: 14px solid #3e2723;
-            border-radius: 20px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.6), 0 10px 25px rgba(0,0,0,0.7);
+        /* Bloc Jeu (HUD + Tapis) */
+        #game-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-grow: 1;
+            max-width: 720px;
+            width: 100%;
         }
 
         /* HUD et Scores */
         #hud {
             display: flex;
             justify-content: space-around;
-            width: 720px;
+            width: 100%;
             background: #222;
             border: 2px solid #d4af37;
             border-bottom: none;
             border-radius: 10px 10px 0 0;
-            padding: 10px 0;
+            padding: 5px 0;
             font-weight: bold;
             box-sizing: border-box;
+            font-size: 12px;
         }
 
         .score-box { text-align: center; }
-        .score-val { color: #d4af37; font-size: 20px; }
+        .score-val { color: #d4af37; font-size: 16px; }
 
-        /* Positions des joueurs autour de la table */
+        /* Tapis de jeu auto-adaptatif */
+        #game-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 72 / 52; 
+            max-height: 72vh;
+            background: radial-gradient(#1b5e20, #0d3c12);
+            border: 8px solid #3e2723;
+            border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.6), 0 10px 25px rgba(0,0,0,0.7);
+            box-sizing: border-box;
+        }
+
+        /* Positions des labels joueurs */
         .player-label {
             position: absolute;
             background: rgba(0, 0, 0, 0.85);
-            padding: 8px 14px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 15px;
             font-weight: bold;
             border: 2px solid #555;
-            z-index: 10;
+            z-index: 15;
             transition: all 0.3s ease;
-            max-width: 160px;
+            max-width: 25%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 11px;
         }
         .player-label.active { 
             border-color: #ffeb3b; 
-            box-shadow: 0 0 15px #ffeb3b; 
+            box-shadow: 0 0 10px #ffeb3b; 
             transform: scale(1.05);
         }
         
-        #label-p0 { bottom: 10px; left: 50%; transform: translateX(-50%); color: #4fc3f7; }
-        #label-p1 { left: 15px; top: 50%; transform: translateY(-50%); }
-        #label-p2 { top: 10px; left: 50%; transform: translateX(-50%); color: #ffb74d; }
-        #label-p3 { right: 15px; top: 50%; transform: translateY(-50%); }
+        #label-p0 { bottom: 4px; left: 50%; transform: translateX(-50%); color: #4fc3f7; }
+        #label-p1 { left: 4px; top: 50%; transform: translateY(-50%); }
+        #label-p2 { top: 4px; left: 50%; transform: translateX(-50%); color: #ffb74d; }
+        #label-p3 { right: 4px; top: 50%; transform: translateY(-50%); }
 
-        /* Zone centrale tactile/cliquable */
+        /* Zone centrale (Zone de texte des actions) */
         #table-center {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 320px;
-            height: 240px;
+            width: 32%;
+            height: 22%;
             transform: translate(-50%, -50%);
-            border: 2px dashed rgba(212, 175, 55, 0.5);
-            border-radius: 15px;
-            background: rgba(0,0,0,0.25);
+            border: 2px dashed rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.35);
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -148,131 +182,127 @@
             color: #ffeb3b;
             font-weight: bold;
             text-align: center;
-            font-size: 14px;
-            padding: 5px;
+            font-size: 11px;
+            padding: 3px;
             text-shadow: 1px 1px 3px black;
             pointer-events: none;
-            line-height: 1.4;
+            line-height: 1.3;
             z-index: 8;
         }
 
-        /* Bouton d'explication (Point d'interrogation) */
         #btn-explain {
             display: none;
-            margin-top: 5px;
-            padding: 4px 10px;
+            margin-top: 3px;
+            padding: 2px 6px;
             background: #ffb74d;
             border: none;
             color: black;
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
             z-index: 20;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        #btn-explain:hover { background: #ffe082; }
 
-        /* Cartes stylisées type Casino */
+        /* CARTES : Taille responsive proportionnelle par rapport au tapis */
         .card {
-            width: 60px;
-            height: 90px;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #ffffff, #eaeaea);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 6px;
+            padding: 4px;
             box-sizing: border-box;
             font-weight: bold;
-            box-shadow: 3px 3px 8px rgba(0,0,0,0.5), inset 0 0 4px rgba(0,0,0,0.2);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.5), inset 0 0 3px rgba(0,0,0,0.2);
             user-select: none;
             border: 1px solid #ccc;
-            position: relative;
         }
+
         .card.red { color: #d32f2f; }
         .card.black { color: #111111; }
         
         .card .suit-center {
-            font-size: 26px;
+            font-size: 22px;
             text-align: center;
             line-height: 1;
         }
-        .card .top-left { font-size: 16px; line-height: 1; }
-        .card .bottom-right { font-size: 16px; line-height: 1; transform: rotate(180deg); }
+        .card .top-left { font-size: 13px; line-height: 1; }
+        .card .bottom-right { font-size: 13px; line-height: 1; transform: rotate(180deg); }
 
-        /* Animation d'apparition avec rotation */
+        /* Animations */
         @keyframes playCardAnim {
             0% {
                 opacity: 0;
-                transform: translate(var(--startX), var(--startY)) scale(0.5) rotate(0deg);
+                transform: translate(var(--startX), var(--startY)) scale(0.5);
             }
             100% {
                 opacity: 1;
-                transform: translate(0, 0) scale(1) rotate(var(--rotAngle));
+                transform: translate(0, 0) scale(1);
             }
         }
-
         .animated-card {
-            animation: playCardAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+            animation: playCardAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
         }
 
         /* Main du joueur humain */
         #player-hand {
             position: absolute;
-            bottom: 45px;
+            bottom: 35px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 6px;
+            gap: 4px;
             z-index: 12;
             width: max-content;
+            height: 18%; /* Même hauteur proportionnelle que les cartes posées */
+            width: 70%;
+            justify-content: center;
         }
         #player-hand .card {
+            width: 11%;
+            height: 100%;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         #player-hand .card:hover {
-            transform: translateY(-20px);
+            transform: translateY(-15px);
             border-color: #ffeb3b;
-            box-shadow: 0 0 12px #ffeb3b;
+            box-shadow: 0 0 10px #ffeb3b;
             cursor: pointer;
         }
 
-        /* Cartes posées au centre */
+        /* EMPLACEMENTS DISTINCTS POUR CHAQUE JOUEUR AUTOUR DU CENTRE */
         .played-container { 
             position: absolute; 
             z-index: 6; 
-            pointer-events: none; 
+            pointer-events: none;
+            width: 9.5%;
+            height: 18%;
         }
-        #played-0 { bottom: 12px; left: 50%; margin-left: -30px; } 
-        #played-1 { left: 12px; top: 50%; margin-top: -45px; }    
-        #played-2 { top: 12px; left: 50%; margin-left: -30px; }   
-        #played-3 { right: 12px; top: 50%; margin-top: -45px; }   
+        
+        /* Positionnement en cercle autour de la boîte centrale */
+        #played-0 { bottom: 25%; left: 50%; transform: translateX(-50%); } /* Joueur Sud */
+        #played-1 { left: 22%; top: 50%; transform: translateY(-50%); }    /* IA 1 Ouest */
+        #played-2 { top: 25%; left: 50%; transform: translateX(-50%); }    /* IA 2 Nord */
+        #played-3 { right: 22%; top: 50%; transform: translateY(-50%); }   /* IA 3 Est */
 
-        /* Boutons principaux */
+        /* Boutons */
         .game-btn {
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        #btn-main {
-            background: linear-gradient(#d4af37, #aa820a);
-            color: black;
-            border: 1px solid #ffe57f;
-        }
-        #btn-main:hover { background: linear-gradient(#ffe57f, #d4af37); }
-        
-        #btn-rules {
-            background: #333;
-            color: #d4af37;
-            border: 1px solid #d4af37;
-        }
-        #btn-rules:hover { background: #444; }
+        #btn-main { background: linear-gradient(#d4af37, #aa820a); color: black; border: 1px solid #ffe57f; }
+        #btn-rules { background: #333; color: #d4af37; border: 1px solid #d4af37; }
+        #btn-credits { background: #222; color: #cfd8dc; border: 1px solid #546e7a; }
 
-        /* Écrans de Configuration et Panneaux Popups */
+        /* Popups / Panneaux */
         .overlay-panel {
             display: none;
             position: absolute;
@@ -282,35 +312,47 @@
             background: #2a2a2a;
             border: 3px solid #d4af37;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             z-index: 100;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            width: 310px;
+            width: 280px;
             box-sizing: border-box;
         }
-        .overlay-panel h4 { margin-top: 0; color: #d4af37; text-align: center; margin-bottom: 12px; font-size: 16px; }
+        .overlay-panel h4 { margin-top: 0; color: #d4af37; text-align: center; margin-bottom: 8px; font-size: 14px; }
         
         .panel-step { display: none; }
         .panel-step.active { display: block; }
-
-        .input-group { margin-bottom: 8px; display: flex; flex-direction: column; }
-        .input-group label { font-size: 11px; margin-bottom: 3px; color: #ccc; }
-        .input-group input { padding: 6px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-weight: bold; font-size: 13px; }
-        
-        .panel-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-        .panel-btn { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
+        .input-group { margin-bottom: 6px; display: flex; flex-direction: column; }
+        .input-group label { font-size: 10px; margin-bottom: 2px; color: #ccc; }
+        .input-group input { padding: 5px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-weight: bold; font-size: 12px; }
+        .panel-buttons { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+        .panel-btn { padding: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center; }
         .btn-gold { background: linear-gradient(#d4af37, #aa820a); color: black; }
-        .btn-gold:hover { background: linear-gradient(#ffe57f, #d4af37); }
         .btn-dark { background: #444; color: white; }
-        .btn-dark:hover { background: #555; }
 
-        /* Style spécifique pour la popup de la règle complète */
-        #rules-popup {
-            width: 460px;
-            max-height: 440px;
-            overflow-y: auto;
+        #rules-popup { width: 90%; max-width: 440px; max-height: 80%; overflow-y: auto; }
+        #rules-popup p, #rules-popup ul { font-size: 11px; color: #ddd; line-height: 1.4; margin: 4px 0; padding-left: 10px; }
+
+        /* RESPONSIVE PORTRAIT */
+        @media (orientation: portrait) {
+            #main-layout {
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+            #sidebar {
+                display: none; 
+            }
+            #game-block {
+                width: 100%;
+                height: 100%;
+            }
+            #game-container {
+                max-height: 60vh;
+            }
+            #played-1 { left: 12%; }
+            #played-3 { right: 12%; }
+            #player-hand { width: 95%; }
         }
-        #rules-popup p, #rules-popup ul { font-size: 12px; color: #ddd; line-height: 1.5; margin: 6px 0; padding-left: 15px; }
     </style>
 </head>
 <body>
@@ -319,53 +361,50 @@
     
     <div id="top-bar">
         <button id="btn-main" class="game-btn" onclick="showNameChoice()">Distribuer les cartes</button>
-        <button id="btn-rules" class="game-btn" onclick="toggleRulesPopup(true)">📜 Règles du jeu</button>
+        <button id="btn-rules" class="game-btn" onclick="togglePopup('rules-popup', true)">📜 Règles du jeu</button>
+        <button id="btn-credits" class="game-btn" onclick="togglePopup('credits-popup', true)">ℹ️ Crédits</button>
     </div>
 
     <div id="main-layout">
-        <!-- Aide mémoire à gauche -->
         <div id="sidebar">
             <h3>Couleurs (Naipes)</h3>
-            <table class="rule-table" style="margin-bottom: 15px;">
-                <tr><td>♥ <b>Copas</b> (Cœur)</td><td>♣ <b>Paus</b> (Trèfle)</td></tr>
-                <tr><td>♠ <b>Espadas</b> (Pique)</td><td>♦ <b>Ouros</b> (Carreau)</td></tr>
+            <table class="rule-table" style="margin-bottom: 8px;">
+                <tr><td>♥ <b>Copas</b></td><td>♣ <b>Paus</b></td></tr>
+                <tr><td>♠ <b>Espadas</b></td><td>♦ <b>Ouros</b></td></tr>
             </table>
 
             <h3>Ordre & Points</h3>
             <table class="rule-table">
-                <thead><tr><th>Carte</th><th>Nom</th><th>Points</th></tr></thead>
+                <thead><tr><th>Carte</th><th>Nom</th><th>Pts</th></tr></thead>
                 <tbody>
-                    <tr><td><b>A</b></td><td>Ás</td><td><b>11 pts</b></td></tr>
-                    <tr><td><b>7</b></td><td>Manilha</td><td><b>10 pts</b></td></tr>
-                    <tr><td><b>K</b></td><td>Rei</td><td><b>4 pts</b></td></tr>
-                    <tr><td><b>J</b></td><td>Valete</td><td><b>3 pts</b></td></tr>
-                    <tr><td><b>Q</b></td><td>Dama</td><td><b>2 pts</b></td></tr>
-                    <tr><td>6, 5, 4, 3, 2</td><td>Brancas</td><td>0 pt</td></tr>
+                    <tr><td><b>A</b></td><td>Ás</td><td><b>11</b></td></tr>
+                    <tr><td><b>7</b></td><td>Manilha</td><td><b>10</b></td></tr>
+                    <tr><td><b>K</b></td><td>Rei</td><td><b>4</b></td></tr>
+                    <tr><td><b>J</b></td><td>Valete</td><td><b>3</b></td></tr>
+                    <tr><td><b>Q</b></td><td>Dama</td><td><b>2</b></td></tr>
+                    <tr><td>6 à 2</td><td>Brancas</td><td>0</td></tr>
                 </tbody>
             </table>
-            <p style="font-size: 11px; color:#aaa; margin-top:10px; text-align:center;">Total : 120 points.<br>L'équipe à 61+ points gagne.</p>
+            <p style="font-size: 10px; color:#aaa; margin-top:5px; text-align:center;">Total : 120 pts.<br>Équipe à 61+ gagne.</p>
         </div>
 
-        <!-- Zone de jeu à droite -->
-        <div>
+        <div id="game-block">
             <div id="hud">
-                <div class="score-box"><div>ATOUT (TRUNFO)</div><span id="atout-val" style="font-size:18px;">-</span></div>
+                <div class="score-box"><div>ATOUT (TRUNFO)</div><span id="atout-val">-</span></div>
                 <div class="score-box"><div>ÉQUIPE <span id="hud-ns-name">NORD / SUD</span></div><span id="score-ns" class="score-val">0</span></div>
                 <div class="score-box"><div>ÉQUIPE <span id="hud-eo-name">EST / OUEST</span></div><span id="score-eo" class="score-val">0</span></div>
             </div>
 
             <div id="game-container">
-                <!-- Libellés Joueurs -->
                 <div id="label-p0" class="player-label">Vous (Sud)</div>
                 <div id="label-p1" class="player-label">IA 1 (Ouest)</div>
                 <div id="label-p2" class="player-label">IA 2 (Nord)</div>
                 <div id="label-p3" class="player-label">IA 3 (Est)</div>
 
-                <!-- POPUP CONFIGURATION DES NOMS -->
                 <div id="name-config-panel" class="overlay-panel">
                     <div id="step-choice" class="panel-step active">
                         <h4>Configuration de la partie</h4>
-                        <p style="font-size: 13px; text-align: center; margin: 10px 0; color: #ddd; line-height: 1.4;">
+                        <p style="font-size: 12px; text-align: center; margin: 5px 0; color: #ddd; line-height: 1.3;">
                             Souhaitez-vous personnaliser le nom des joueurs avant de lancer le jeu ?
                         </p>
                         <div class="panel-buttons">
@@ -385,7 +424,7 @@
                             <input type="text" id="input-p1" value="IA 1">
                         </div>
                         <div class="input-group">
-                            <label>IA 2 (Nord - Partenaire) :</label>
+                            <label>IA 2 (Nord) :</label>
                             <input type="text" id="input-p2" value="IA 2">
                         </div>
                         <div class="input-group">
@@ -398,35 +437,44 @@
                     </div>
                 </div>
 
-                <!-- POPUP DES REGLES COMPLETES -->
                 <div id="rules-popup" class="overlay-panel">
                     <h4>Règles officielles de la Sueca</h4>
-                    <p><b>But du jeu :</b> Accumuler le plus de points possible avec son partenaire de camp (Nord/Sud ou Est/Ouest). Une partie compte 120 points au total. L'équipe qui obtient 61 points ou plus gagne la manche.</p>
-                    <p><b>La Distribution :</b> Chaque joueur reçoit 10 cartes (l'intégralité du paquet de 40 cartes est distribuée). La toute dernière carte distribuée détermine la couleur de l'<b>Atout (Trunfo)</b> pour toute la manche.</p>
+                    <p><b>But du jeu :</b> Accumuler le plus de points possible avec son partenaire de camp (120 points au total). L'équipe qui obtient 61 points ou plus gagne la manche.</p>
+                    <p><b>La Distribution :</b> Chaque joueur reçoit 10 cartes. La toute dernière carte distribuée détermine l'<b>Atout (Trunfo)</b>.</p>
                     <p><b>Déroulement d'un pli :</b></p>
                     <ul>
-                        <li>Le premier joueur pose la carte de son choix, ce qui fixe la <b>couleur demandée</b>.</li>
-                        <li>Chaque joueur suivant a l'<b>obligation absolue de fournir</b> la couleur demandée s'il en possède en main.</li>
-                        <li>Si un joueur n'a pas la couleur demandée, il peut couper avec un <b>Atout</b> (Trunfo) ou se défausser d'une autre couleur (Renonce).</li>
+                        <li>Le premier joueur fixe la <b>couleur demandée</b>.</li>
+                        <li>Chaque joueur suivant a l'<b>obligation absolue de fournir</b> la couleur demandée s'il en a.</li>
+                        <li>À défaut, il peut couper à l'Atout ou se défausser.</li>
                     </ul>
-                    <p><b>Qui remporte le pli ?</b> Celui qui a posé l'Atout le plus fort. Si aucun Atout n'a été joué, c'est celui qui a posé la carte la plus forte dans la couleur demandée initiale.</p>
                     <div class="panel-buttons">
-                        <button class="panel-btn btn-gold" onclick="toggleRulesPopup(false)">Fermer les règles</button>
+                        <button class="panel-btn btn-gold" onclick="togglePopup('rules-popup', false)">Fermer les règles</button>
                     </div>
                 </div>
 
-                <!-- Tapis central interactif -->
+                <div id="credits-popup" class="overlay-panel">
+                    <h4>Crédits</h4>
+                    <p style="text-align:center;">
+                        <b style="color: #d4af37; font-size: 14px;">LA SUECA</b><br>
+                        Jeu de cartes portugais<br><br>
+                        Fait par <span style="color: #ffeb3b; font-weight: bold;">Pat ROM</span><br>
+                        <span style="font-size: 11px; color: #aaa;">(c) 2026</span>
+                    </p>
+                    <div class="panel-buttons">
+                        <button class="panel-btn btn-gold" onclick="togglePopup('credits-popup', false)">Fermer</button>
+                    </div>
+                </div>
+
                 <div id="table-center" onclick="handleTableClick()">
                     <div id="action-prompt">Cliquez sur "Distribuer les cartes" pour commencer</div>
                     <button id="btn-explain" onclick="showExplanation(event)">❓ Log du pli</button>
-                    
-                    <div id="played-0" class="played-container"></div>
-                    <div id="played-1" class="played-container"></div>
-                    <div id="played-2" class="played-container"></div>
-                    <div id="played-3" class="played-container"></div>
                 </div>
 
-                <!-- Main du joueur humain -->
+                <div id="played-0" class="played-container"></div>
+                <div id="played-1" class="played-container"></div>
+                <div id="played-2" class="played-container"></div>
+                <div id="played-3" class="played-container"></div>
+
                 <div id="player-hand"></div>
             </div>
         </div>
@@ -442,11 +490,12 @@
     const VALUES_ORDER = ['A', '7', 'K', 'J', 'Q', '6', '5', '4', '3', '2'];
     const POINTS = { 'A': 11, '7': 10, 'K': 4, 'J': 3, 'Q': 2, '6': 0, '5': 0, '4': 0, '3': 0, '2': 0 };
 
+    // Trajectoires d'animation simplifiées et fluides
     const START_POSITIONS = {
-        0: { x: '0px', y: '250px' },   
-        1: { x: '-250px', y: '0px' },  
-        2: { x: '0px', y: '-250px' },  
-        3: { x: '250px', y: '0px' }    
+        0: { x: '0px', y: '100px' },   
+        1: { x: '-100px', y: '0px' },  
+        2: { x: '0px', y: '-100px' },  
+        3: { x: '100px', y: '0px' }    
     };
 
     let deck = [];
@@ -462,8 +511,8 @@
 
     let playerNames = { 0: "Vous", 1: "IA 1", 2: "IA 2", 3: "IA 3" };
 
-    function toggleRulesPopup(show) {
-        document.getElementById('rules-popup').style.display = show ? 'block' : 'none';
+    function togglePopup(popupId, show) {
+        document.getElementById(popupId).style.display = show ? 'block' : 'none';
     }
 
     function showNameChoice() {
@@ -599,11 +648,11 @@
         updateTurnHighlight();
         if (turn === 0) {
             gameState = 'WAITING_HUMAN';
-            document.getElementById('action-prompt').innerHTML = "C'est votre tour !<br><span style='color:#fff;'>Touchez une carte de votre main en bas.</span>";
+            document.getElementById('action-prompt').innerHTML = "C'est votre tour !<br><span style='color:#fff; font-size:10px;'>Touchez une carte en bas.</span>";
         } else {
             gameState = 'PLAYING_AI';
-            let nameIA = turn === 2 ? playerNames[2] + " (Votre partenaire)" : playerNames[turn];
-            document.getElementById('action-prompt').innerHTML = "C'est au tour de <b>" + nameIA + "</b>.<br><span style='color:#4fc3f7;'>👉 Touchez la table pour le faire jouer.</span>";
+            let nameIA = turn === 2 ? playerNames[2] + " (Partenaire)" : playerNames[turn];
+            document.getElementById('action-prompt').innerHTML = "Tour de <b>" + nameIA + "</b>.<br><span style='color:#4fc3f7; font-size:10px;'>👉 Touchez le tapis.</span>";
         }
     }
 
@@ -613,7 +662,7 @@
         if (currentTrick.length > 0) {
             const leadSuit = currentTrick[0].card.suit;
             if (card.suit !== leadSuit && hands[0].some(c => c.suit === leadSuit)) {
-                alert(`Obligation de fournir ! Vous devez jouer du ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).`);
+                alert(`Obligation de fournir ! Jouez du ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).`);
                 return;
             }
         }
@@ -647,14 +696,14 @@
     function executePlay(playerIdx, card) {
         currentTrick.push({ player: playerIdx, card: card });
         
-        const randomAngle = (Math.random() * 24 - 12) + "deg";
+        const randomAngle = (Math.random() * 16 - 8) + "deg";
         const start = START_POSITIONS[playerIdx];
 
         const targetDiv = document.getElementById(`played-${playerIdx}`);
         
         targetDiv.innerHTML = `
             <div class="card ${SUITS[card.suit].color} animated-card" 
-                 style="--startX: ${start.x}; --startY: ${start.y}; --rotAngle: ${randomAngle};">
+                 style="--startX: ${start.x}; --startY: ${start.y}; transform: rotate(${randomAngle});">
                 <div class="top-left">${card.value}</div>
                 <div class="suit-center">${SUITS[card.suit].sym}</div>
                 <div class="bottom-right">${card.value}</div>
@@ -664,7 +713,7 @@
 
         if (currentTrick.length === 4) {
             gameState = 'TRICK_DONE';
-            document.getElementById('action-prompt').innerHTML = "<span style='color:#ffeb3b; font-size:15px;'>Le pli est complet !</span><br>👉 Touchez le tapis pour compter.";
+            document.getElementById('action-prompt').innerHTML = "<span style='color:#ffeb3b;'>Pli complet !</span><br>👉 Touchez pour compter.";
         } else {
             progressGame();
         }
@@ -674,10 +723,10 @@
         const leadSuit = currentTrick[0].card.suit;
         let winnerObj = currentTrick[0];
         let cutOccurred = currentTrick[0].card.suit === currentAtout;
-        let detailsLog = `Couleur initialement demandée : ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).\n\nCartes jouées :\n`;
+        let detailsLog = `Couleur demandée : ${SUITS[leadSuit].name} (${SUITS[leadSuit].sym}).\n\nCartes :\n`;
 
         currentTrick.forEach(t => {
-            detailsLog += `- ${playerNames[t.player]} : ${t.card.value} de ${SUITS[t.card.suit].name} ${SUITS[t.card.suit].sym}\n`;
+            detailsLog += `- ${playerNames[t.player]} : ${t.card.value} de ${SUITS[t.card.suit].name}\n`;
         });
 
         for (let i = 1; i < currentTrick.length; i++) {
@@ -705,14 +754,11 @@
 
         let winnerName = playerNames[winnerObj.player];
 
-        // Construction du log d'explication précis
-        detailsLog += `\nRésultat : ${winnerName} remporte le pli avec son ${winnerObj.card.value} de ${SUITS[winnerObj.card.suit].name}. `;
+        detailsLog += `\nGagnant : ${winnerName} (${winnerObj.card.value}). `;
         if (winnerObj.card.suit === currentAtout && leadSuit !== currentAtout) {
-            detailsLog += `Il a coupé avec l'Atout !`;
-        } else {
-            detailsLog += `C'était la carte la plus forte dans la couleur demandée.`;
+            detailsLog += `A coupé !`;
         }
-        detailsLog += `\nValeur totale récoltée : ${trickPoints} points.`;
+        detailsLog += `\nValeur : ${trickPoints} pts.`;
         lastTrickExplanation = detailsLog;
 
         if (winnerObj.player === 0 || winnerObj.player === 2) {
@@ -731,8 +777,8 @@
         document.getElementById('btn-explain').style.display = 'block';
 
         if (hands[0].length > 0) {
-            document.getElementById('action-prompt').innerHTML = "<b>" + winnerName + "</b> remporte le pli (+" + trickPoints + " pts).<br>Préparation du pli suivant...";
-            setTimeout(progressGame, 1400);
+            document.getElementById('action-prompt').innerHTML = "<b>" + winnerName + "</b> gagne (+" + trickPoints + " pts).";
+            setTimeout(progressGame, 1200);
         } else {
             endHand();
         }
@@ -748,18 +794,18 @@
     function endHand() {
         gameState = 'GAME_OVER';
         document.getElementById('btn-explain').style.display = 'none';
-        let msg = `<b>Fin de la partie !</b><br>${playerNames[0]}/${playerNames[2]} : ${scoreNS} pts<br>${playerNames[1]}/${playerNames[3]} : ${scoreEO} pts.<br>`;
+        let msg = `<b>Fin !</b><br>${playerNames[0]}/${playerNames[2]} : ${scoreNS} pts<br>${playerNames[1]}/${playerNames[3]} : ${scoreEO} pts.<br>`;
         if (scoreNS > 60) {
-            msg += "<span style='color:#66bb6a; font-size:16px;'>🏆 Victoire de votre équipe !</span>";
+            msg += "<span style='color:#66bb6a;'>🏆 Victoire !</span>";
         } else if (scoreEO > 60) {
-            msg += "<span style='color:#ef5350; font-size:16px;'>❌ Défaite de votre équipe.</span>";
+            msg += "<span style='color:#ef5350;'>❌ Défaite.</span>";
         } else {
-            msg += "🤝 Égalité parfaite (60-60).";
+            msg += "🤝 Égalité.";
         }
         
         document.getElementById('action-prompt').innerHTML = msg;
         document.getElementById('btn-main').style.display = 'block';
-        document.getElementById('btn-main').innerText = 'Rejouer une partie';
+        document.getElementById('btn-main').innerText = 'Rejouer';
     }
 </script>
 </body>
